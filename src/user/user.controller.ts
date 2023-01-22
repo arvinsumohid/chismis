@@ -6,18 +6,42 @@ import {
   Patch,
   Param,
   Delete,
+  BadRequestException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { validate } from 'class-validator';
 
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  create(@Body() createTopicDto: CreateUserDto) {
-    return this.userService.create(createTopicDto);
+  async create(@Body() createUserDto: CreateUserDto) {
+    const errors = await validate(createUserDto);
+    if (errors.length > 0)
+      throw new BadRequestException('there are fields that required');
+
+    if (
+      !createUserDto.email ||
+      !createUserDto.name ||
+      !createUserDto.password ||
+      !createUserDto.repassword ||
+      !createUserDto.username
+    )
+      throw new BadRequestException('fields are required');
+
+    if (createUserDto.password !== createUserDto.repassword)
+      throw new BadRequestException('password and repassword not match');
+
+    // const emailCheck = await this.userService.findByEmail(createUserDto.email);
+    // if (emailCheck) throw new BadRequestException('email already exist');
+
+    // if (this.userService.findByUsername(createUserDto.username))
+    //   throw new BadRequestException('username already exist');
+
+    return this.userService.create(createUserDto);
   }
 
   @Get()
@@ -31,8 +55,8 @@ export class UserController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTopicDto: UpdateUserDto) {
-    return this.userService.update(id, updateTopicDto);
+  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.userService.update(id, updateUserDto);
   }
 
   @Delete(':id')

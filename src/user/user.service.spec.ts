@@ -1,6 +1,8 @@
 import { getModelToken } from '@nestjs/mongoose';
 import { Test, TestingModule } from '@nestjs/testing';
+import { sign } from 'crypto';
 import { Model } from 'mongoose';
+import { CreateUserDto } from './dto/create-user.dto';
 import { User, UserDocument } from './schema/user.schema';
 import { UserService } from './user.service';
 
